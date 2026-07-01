@@ -72,9 +72,13 @@ class TimeScheduler {
 
     /**
      * @brief Call every loop iteration. Handles checking if timer is ready.
+     * 
+     * @return \c boolean
      */
-    bool ready() {
+    boolean ready() {
       uint32_t nowUs = micros();
+
+      // Check if enough time have passed by
       if ((uint32_t)(nowUs - lastReadyUs) >= intervalUs) {
         lastReadyUs = nowUs;
         return true;
@@ -131,16 +135,18 @@ class LED {
      * @brief Call every loop iteration. Handles exponential blinking.
      */
     void update() {
-      if (!blinking) return;
-      if (!timer.ready()) return;
+      if (!blinking) return;      // Not in blinker mode
+      if (!timer.ready()) return; // Timer is not ready
 
-      uint32_t now = millis();
-      uint16_t elapsed = (now - blinkStartMs) % blinkRateMs;
-
+      // Compute the position inside the blink cycle and normalize
+      uint16_t elapsed = (millis() - blinkStartMs) % blinkRateMs;
       float phase = (float)elapsed / (float)blinkRateMs;
+
+      // Calculate the triangle wave brightness (linear fade in/out), then square it
       float intensity = phase < 0.5f ? phase * 2.0f : (1.0f - phase) * 2.0f;
       float exponentialIntensity = intensity * intensity;
       
+      // Scale to a byte and write out
       analogWrite(pin, (uint8_t)(exponentialIntensity * 255.0f));
     }
 
@@ -170,7 +176,7 @@ class LED {
      * @param rateMs \c uint16_t - Blinking rate in milliseconds. Defaults to 1000ms.
      */
     void blink(uint16_t rateMs=1000) {
-      if (blinking && blinkRateMs == rateMs) return;
+      if (blinking && blinkRateMs == rateMs) return; // Already in blinking mode at the same rate
 
       blinking = true;
       blinkRateMs = rateMs;
@@ -210,6 +216,19 @@ class LED {
     TimeScheduler timer;
 };
 
+/**
+ * @brief Construct the LCD controller and initialize the display. Wraps the LiquidCrystal library.
+ * 
+ * Expects a display size of 20x4.
+ * 
+ * @param rsPin \c uint8_t - Register Select pin.
+ * @param enPin \c uint8_t - Enable pin.
+ * @param d4Pin \c uint8_t - Data pin 4
+ * @param d5Pin \c uint8_t - Data pin 5.
+ * @param d6Pin \c uint8_t - Data pin 6.
+ * @param d7Pin \c uint8_t - Data pin 7.
+ * @param updateIntervalMs \c uint16_t - Refresh interval in milliseconds for display updates.
+ */
 class LCD {
   public:
     LCD(
@@ -220,7 +239,19 @@ class LCD {
     {
       lcd.begin(20, 4);
     }
-
+    
+    /**
+     * @brief Call every loop iteration. Handles updating the Liquid Crystal Display.
+     * 
+     * @param rpm \c uint16_t - Engine or motor RPM.
+     * @param kmh \c float - Speed in kilometers per hour.
+     * @param corner \c float - Cornering force or angle metric.
+     * @param acceleration \c float - Acceleration value.
+     * @param pitch \c float - Vehicle pitch angle.
+     * @param roll \c float - Vehicle roll angle.
+     * @param wattage \c uint16_t - Power consumption in watts.
+     * @param batteryPct \c float - Battery percentage remaining.
+     */
     void update(
       uint16_t rpm, float kmh, float corner, float acceleration,
       float pitch, float roll, uint16_t wattage, float batteryPct
@@ -229,6 +260,7 @@ class LCD {
 
       formatTelemetry(rpm, kmh, corner, acceleration, pitch, roll, wattage, batteryPct, text);
 
+      // Row 1
       lcd.setCursor(0, 0);
       lcd.print("RPM: ");
       lcd.print(text.rpm);
@@ -236,6 +268,7 @@ class LCD {
       lcd.print("KMH: ");
       lcd.print(text.kmh);
 
+      // Row 2
       lcd.setCursor(0, 1);
       lcd.print("CNR: ");
       lcd.print(text.corner);
@@ -243,6 +276,7 @@ class LCD {
       lcd.print("ACC: ");
       lcd.print(text.acceleration);
 
+      // Row 3
       lcd.setCursor(0, 2);
       lcd.print("PIT: ");
       lcd.print(text.pitch);
@@ -250,6 +284,7 @@ class LCD {
       lcd.print("ROL: ");
       lcd.print(text.roll);
 
+      // Row 4
       lcd.setCursor(0, 3);
       lcd.print("WTT: ");
       lcd.print(text.wattage);
@@ -263,6 +298,9 @@ class LCD {
 
     TimeScheduler timer;
     
+    /**
+     * @brief Containing preformatted telemetry strings.
+     */
     struct TelemetryText {
       char rpm[8];
       char kmh[8];
@@ -276,24 +314,39 @@ class LCD {
 
     TelemetryText text;
 
+    /**
+     * @brief Formats an integer with optional thousands seperator.
+     * 
+     * @param value \c uint16_t - Input integer value.
+     * @param out \c char - Output character buffer.
+     */
     void formatIntWithComma(uint16_t value, char *out) {
       if (value < 1000) {
         sprintf(out, "%u", value);
       } else {
+        // Add a thousand seperator
         sprintf(out, "%u,%03u", value / 1000, value % 1000);
       }
     }
 
+    /**
+     * @brief Formats speed in km/h with adaptive decimal precision.
+     * 
+     * @param value \c float - Speed value in km/h.
+     * @param out \c char - Output character buffer.
+     */
     void formatKmh(float value, char *out) {
       value = constrain(value, 0.0f, 99.9f);
     
       int scaled = (int)(value * 100.0f + 0.5f);
     
+      // Low speed, use two decimals.
       if (value < 10.0f) {
         int intPart = scaled / 100;
         int decPart = scaled % 100;
     
         sprintf(out, "%d.%02d", intPart, decPart);
+      // Higher speed, use one decimal.
       } else {
         int scaled10 = (int)(value * 10.0f + 0.5f);
     
@@ -304,16 +357,30 @@ class LCD {
       }
     }
 
-    void formatSmartFloat(float value, char *out, bool forceOneDecimalUnder10, bool signedMode) {
+    /**
+     * @brief Formats a floating-point value with optional sign and precision rules.
+     * 
+     * Uses dtostrf for AVR chip compatibility.
+     * 
+     * @param value \c float - Input float value.
+     * @param out \c char - Output buffer.
+     * @param forceOneDecimalUnder10 \c boolean - If true, forces 1 decimal for values under 10.
+     * @param signedMode \c boolean - If true, prepends + or - sign.
+     */
+    void formatSmartFloat(
+      float value, char *out, boolean forceOneDecimalUnder10, boolean signedMode
+    ) {
       char sign = 0;
 
       if (signedMode) {
+        // Store sign seperately and work with the absolute value
         sign = value >= 0 ? '+' : '-';
         value = fabs(value);
       }
 
       char buffer[10];
 
+      // Format float to string with configurable decimal precision.
       dtostrf(value, 0, value < 10.0f && forceOneDecimalUnder10 ? 1 : 2, buffer);
       
       if (signedMode) {
@@ -323,17 +390,37 @@ class LCD {
       }
     }
 
+    /**
+     * @brief Formats pitch or roll angle with sign and simplified precision.
+     * 
+     * @param value \c float - Angle value in degrees.
+     * @param out \c char - Output buffer.
+     */
     void formatPitchRoll(float value, char *out) {
       char sign = value >= 0 ? '+' : '-';
       value = fabs(value);
 
       char buffer[10];
 
+      // One decimal for small angles, zero for larger
       dtostrf(value, 0, value < 10.0f ? 1 : 0, buffer);
 
       sprintf(out, "%c%s", sign, buffer);
     }
 
+    /**
+     * @brief Converts raw telemetry values into preformatted display strings.
+     * 
+     * @param rpm \c uint16_t - Engine or motor RPM.
+     * @param kmh \c float - Speed in kilometers per hour.
+     * @param corner \c float - Cornering force or angle metric.
+     * @param acceleration \c float - Acceleration value.
+     * @param pitch \c float - Vehicle pitch angle.
+     * @param roll \c float - Vehicle roll angle.
+     * @param wattage \c uint16_t - Power consumption in watts.
+     * @param batteryPct \c float - Battery percentage remaining.
+     * @param text \c TelemetryText - Output struct containing formatted strings.
+     */
     void formatTelemetry(
       uint16_t rpm, float kmh, float corner, float acceleration, float pitch,
       float roll, uint16_t wattage, float batteryPct, TelemetryText &text
@@ -360,8 +447,6 @@ class Tranceiver {
 LCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);
 LED errorLed(ERROR_LED_PIN);
 
-TimeScheduler timer(100000);
-
 /**
  * @brief Called by system at the startup once.
  */
@@ -382,11 +467,6 @@ void loop() {
   uint16_t steeringPot = analogRead(STEERING_POT_PIN);
   boolean leftBlinker = !analogRead(L_BLINKER_SWITCH_PIN);
   boolean rightBlinker = !analogRead(R_BLINKER_SWITCH_PIN);
-
-  if (timer.ready()) {
-    Serial.print("Throttle: " + String(throttlePot) + " | Steering: " + String(steeringPot));
-    Serial.println(" | Left: " + String(leftBlinker) + " | Right: " + String(rightBlinker));
-  }
 
   errorLed.update();
   lcd.update(3456, 45.34f, 2.4f, 3.2f, 12.3f, -7.8f, 78, 87.6f);
