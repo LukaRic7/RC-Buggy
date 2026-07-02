@@ -1,6 +1,6 @@
 .vscode/
 .pio/
 include/
-lib/
+lib/README
 test/
 platformio.ini
