@@ -3,4 +3,3 @@
 include/
 lib/README
 test/
-platformio.ini
