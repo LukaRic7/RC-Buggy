@@ -116,25 +116,3 @@ void loop() {
   noSignalLed.update();
   lcd.update();
 }
-
-/*
-ControlPacket control;
-
-if (transceiver.receive(control)) {
-  // apply throttle + steering here
-
-  TelemetryPacket telemetry;
-  telemetry.rpm = 3456;
-  telemetry.kmh = 45.2f;
-  telemetry.corner = 1.2f;
-  telemetry.acceleration = 3.4f;
-  telemetry.pitch = 0.5f;
-  telemetry.roll = -0.2f;
-  telemetry.wattage = 78;
-  telemetry.batteryPct = 87.6f;
-
-  telemetry.checksum = telemetry.rpm ^ telemetry.wattage;
-
-  transceiver.sendTelemetry(telemetry);
-}
-*/
