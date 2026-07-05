@@ -1,3 +1,9 @@
+# General TODO
+- Finish Accelerometer.h
+- Finish PiezoelectricVibration.h - Watch out for this one, can spike 10-30V.
+- Finish BatteryManager.h - Make this versitile as idk what battery we are using yet.
+- Finish NTCTermistor.h
+
 # Current Issues
 None, yay (haven't tested shit).
 
