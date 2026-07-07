@@ -10,15 +10,25 @@
  */
 class NTCTermistor {
   public:
-    NTCTermistor(uint16_t sampleRateMs=500)
-      : timer((uint32_t)sampleRateMs * 1000)
-    {}
+    NTCTermistor(uint8_t pin, uint16_t sampleRateMs=500)
+      : pin(pin), timer((uint32_t)sampleRateMs * 1000), celcius(0)
+    {
+      pinMode(pin, INPUT);
+    }
     
     /**
      * @brief Call every loop iteration.
      */
     void update() {
+      if (!timer.ready()) return;
 
+      uint16_t rawValue = analogRead(pin);
+      float voltage = rawValue * 5.0f / 1023.0f;
+      float resistance = (voltage / 5.0f) * 10000.0f
+        / (1.0f - (voltage / 5.0f));
+      
+      celcius = (1.0f / ((1.0f / 298.15f) + (1.0f / 3950.0f)
+        * log(resistance / 10000.0f))) - 273.15f;
     }
     
     /**
@@ -27,9 +37,13 @@ class NTCTermistor {
      * @return \c float - 
      */
     float getCelcius() const {
-      
+      return celcius;
     }
 
   private:
+    uint8_t pin;
+  
     TimeScheduler timer;
+
+    float celcius;
 };
