@@ -5,9 +5,11 @@
 #include "TimeScheduler.h"
 
 /**
- * @brief 
+ * @brief Class for reading and processing data from the MPU-6050 accelerometer.
  * 
- * @param sampleRateMs \c uint16_t - 
+ * @param sampleRateMs \c uint16_t - The sample rate in milliseconds for reading data from the
+ * accelerometer.
+ * @param address \c uint8_t - The I2C address of the MPU-6050.
  */
 class Accelerometer {
   public:
@@ -18,7 +20,7 @@ class Accelerometer {
     {}
 
   /**
-   * 
+   * @brief Initializes the I2C communication and configures the MPU-6050.
    */
   void begin() {
     Wire.begin();
@@ -37,7 +39,7 @@ class Accelerometer {
   }
 
   /**
-   * @brief Call every loop iteration.
+   * @brief Call every loop iteration. Reads the current acceleration and rotation values.
    */
   void update() {
     if (!timer.ready()) return;

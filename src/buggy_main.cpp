@@ -87,13 +87,16 @@ void loop() {
   if (transceiver.receive(control)) {
     TelemetryPacket telemetry;
     telemetry.rpm = 0;
-    telemetry.kmh = 0.0f;
-    telemetry.corner = accelerometer.getLatAccel();
-    telemetry.acceleration = accelerometer.getLongAccel();;
-    telemetry.pitch = accelerometer.getPitch();
-    telemetry.roll = accelerometer.getRoll();
-    telemetry.wattage = 0;
-    telemetry.batteryPct = 0.0f;
+    telemetry.kmh = 0 * 100;
+    telemetry.temperature = ntcTermistor.getCelcius() * 10;
+    telemetry.corner = accelerometer.getLatAccel() * 100;
+    telemetry.acceleration = accelerometer.getLongAccel() * 100;
+    telemetry.pitch = accelerometer.getPitch() * 10;
+    telemetry.roll = accelerometer.getRoll() * 10;
+    telemetry.wattage = 0 * 10;
+    telemetry.batteryPct = 0 * 10;
+    telemetry.frontVib = 0;
+    telemetry.backVib = 0;
   
     telemetry.checksum = telemetry.rpm ^ telemetry.wattage;
   

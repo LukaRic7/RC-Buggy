@@ -4,9 +4,10 @@
 #include "TimeScheduler.h"
 
 /**
- * @brief 
+ * @brief Class for reading temperature from an NTC thermistor.
  * 
- * @param sampleRateMs \c uint16_t - 
+ * @param pin \c uint8_t - Analog pin connected to the thermistor.
+ * @param sampleRateMs \c uint16_t - Sampling rate in milliseconds. Default is 500ms.
  */
 class NTCTermistor {
   public:
@@ -32,9 +33,9 @@ class NTCTermistor {
     }
     
     /**
-     * @brief 
+     * @brief Returns the last measured temperature in degrees Celsius.
      * 
-     * @return \c float - 
+     * @return \c float - Last measured temperature in degrees Celsius.
      */
     float getCelcius() const {
       return celcius;

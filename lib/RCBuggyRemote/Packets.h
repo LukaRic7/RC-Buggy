@@ -61,13 +61,16 @@ struct __attribute((packed)) TelemetryPacket {
   uint8_t header = 0xBA;
 
   uint16_t rpm;
-  float kmh;
-  float corner;
-  float acceleration;
-  float pitch;
-  float roll;
-  uint16_t wattage;
-  float batteryPct;
+  uint16_t kmh;          // km/h * 100
+  int16_t temperature;   // °C * 10
+  int16_t corner;        // m/s² * 100
+  int16_t acceleration;  // m/s² * 100
+  int16_t pitch;         // degrees * 10
+  int16_t roll;          // degrees * 10
+  uint16_t wattage;      // Watts * 10
+  uint16_t batteryPct;   // percentage * 10
+  uint8_t frontVib;
+  uint8_t backVib;
 
   uint16_t checksum;
 };

@@ -70,7 +70,7 @@ constexpr uint8_t ERROR_LED_PIN = 3;
 // LIFECYCLE                                                                                      //
 // ============================================================================================== //
 
-LCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN);
+LCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN, 500);
 LED noSignalLed(ERROR_LED_PIN);
 Transceiver transceiver(TRANS_CE_PIN, TRANS_CSN_PIN);
 
@@ -104,8 +104,17 @@ void loop() {
     TelemetryPacket telemetry;
     if (transceiver.send(control, telemetry)) {
      lcd.setData(
-      telemetry.rpm, telemetry.kmh, telemetry.corner, telemetry.acceleration, telemetry.pitch,
-      telemetry.roll, telemetry.wattage, telemetry.batteryPct
+      telemetry.rpm,
+      telemetry.kmh / 100.0f,
+      telemetry.temperature / 10.0f,
+      telemetry.corner / 100.0f,
+      telemetry.acceleration / 100.0f,
+      telemetry.pitch / 10.0f,
+      telemetry.roll / 10.0f,
+      telemetry.wattage / 10.0f,
+      telemetry.batteryPct / 10.0f,
+      telemetry.frontVib,
+      telemetry.backVib
      );
     }
 
