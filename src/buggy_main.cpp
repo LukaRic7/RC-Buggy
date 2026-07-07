@@ -19,6 +19,7 @@
 #include <Arduino.h>
 
 // Custom libraries
+#include "PiezoelectricVibration.h"
 #include "TimeScheduler.h"
 #include "Accelerometer.h"
 #include "NTCTermistor.h"
@@ -54,11 +55,17 @@ constexpr uint8_t ACCEL_SDA = A4;
 // NTCtermistor
 constexpr uint8_t NTC_TERMISTOR_PIN = A0;
 
+// Piezoelectric vibration
+constexpr uint8_t PIEZO_VIBRATION_FRONT_PIN = A1;
+constexpr uint8_t PIEZO_VIBRATION_BACK_PIN  = A2;
+
 // ============================================================================================== //
 // LIFECYCLE                                                                                      //
 // ============================================================================================== //
 
 Transceiver transceiver(TRANS_CE_PIN, TRANS_CSN_PIN);
+PiezoelectricVibration frontVibration(PIEZO_VIBRATION_FRONT_PIN);
+PiezoelectricVibration backVibration(PIEZO_VIBRATION_BACK_PIN);
 Accelerometer accelerometer(10);
 TimeScheduler transmitTimer(1000000 / (uint32_t)TRANSMIT_HZ);
 NTCTermistor ntcTermistor(NTC_TERMISTOR_PIN);
@@ -83,6 +90,8 @@ void loop() {
 
   accelerometer.update();
   ntcTermistor.update();
+  frontVibration.update();
+  backVibration.update();
 
   if (transceiver.receive(control)) {
     TelemetryPacket telemetry;
@@ -95,8 +104,8 @@ void loop() {
     telemetry.roll = accelerometer.getRoll() * 10;
     telemetry.wattage = 0 * 10;
     telemetry.batteryPct = 0 * 10;
-    telemetry.frontVib = 0;
-    telemetry.backVib = 0;
+    telemetry.frontVib = frontVibration.getCurrent();
+    telemetry.backVib = backVibration.getCurrent();
   
     telemetry.checksum = telemetry.rpm ^ telemetry.wattage;
   

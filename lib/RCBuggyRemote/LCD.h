@@ -65,7 +65,6 @@ public:
     lcd.setCursor(13, 1);
     lcd.write((byte)4);
     lcd.print(text.frontVib);
-    lcd.print("mm/s");
 
     // Row 3
     lcd.setCursor(0, 2);
@@ -77,7 +76,6 @@ public:
     lcd.setCursor(13, 2);
     lcd.write((byte)5);
     lcd.print(text.backVib);
-    lcd.print("mm/s");
 
     // Row 4
     lcd.setCursor(0, 3);
