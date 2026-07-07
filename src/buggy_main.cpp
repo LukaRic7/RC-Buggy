@@ -20,6 +20,7 @@
 
 // Custom libraries
 #include "TimeScheduler.h"
+#include "Accelerometer.h"
 #include "Transceiver.h"
 #include "Packets.h"
 
@@ -31,6 +32,7 @@
 constexpr boolean SERIAL_DEBUG_MODE = false;
 
 // Radio communication
+const byte RADIO_ADDRESS[6]   = "RCBUG"; 
 constexpr uint8_t TRANSMIT_HZ = 50;
 
 // ============================================================================================== //
@@ -44,12 +46,16 @@ constexpr uint8_t TRANS_MOSI_PIN = 11;
 constexpr uint8_t TRANS_MISO_PIN = 12;
 constexpr uint8_t TRANS_SCK_PIN  = 13;
 
+// Accelerometer
+constexpr uint8_t ACCEL_SCL = A5;
+constexpr uint8_t ACCEL_SDA = A4;
+
 // ============================================================================================== //
 // LIFECYCLE                                                                                      //
 // ============================================================================================== //
 
 Transceiver transceiver(TRANS_CE_PIN, TRANS_CSN_PIN);
-
+Accelerometer accelerometer(10);
 TimeScheduler transmitTimer(1000000 / (uint32_t)TRANSMIT_HZ);
 
 /**
@@ -59,6 +65,9 @@ void setup() {
   if (SERIAL_DEBUG_MODE) {
     Serial.begin(9600);
   }
+  
+  transceiver.begin(transceiver.BUGGY, RADIO_ADDRESS);
+  accelerometer.begin();
 }
 
 /**
@@ -67,16 +76,18 @@ void setup() {
 void loop() {
   ControlPacket control;
 
+  accelerometer.update();
+
   if (transceiver.receive(control)) {
     TelemetryPacket telemetry;
-    telemetry.rpm = 3456;
-    telemetry.kmh = 45.2f;
-    telemetry.corner = 1.2f;
-    telemetry.acceleration = 3.4f;
-    telemetry.pitch = 0.5f;
-    telemetry.roll = -0.2f;
-    telemetry.wattage = 78;
-    telemetry.batteryPct = 87.6f;
+    telemetry.rpm = 0;
+    telemetry.kmh = 0.0f;
+    telemetry.corner = accelerometer.getLatAccel();
+    telemetry.acceleration = accelerometer.getLongAccel();;
+    telemetry.pitch = accelerometer.getPitch();
+    telemetry.roll = accelerometer.getRoll();
+    telemetry.wattage = 0;
+    telemetry.batteryPct = 0.0f;
   
     telemetry.checksum = telemetry.rpm ^ telemetry.wattage;
   

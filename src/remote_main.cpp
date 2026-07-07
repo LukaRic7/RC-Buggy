@@ -30,9 +30,10 @@
 // ============================================================================================== //
 
 // Debugging
-constexpr boolean SERIAL_DEBUG_MODE = false;
+constexpr boolean SERIAL_DEBUG_MODE = true;
 
 // Radio communication
+const byte RADIO_ADDRESS[6]   = "RCBUG"; 
 constexpr uint8_t TRANSMIT_HZ = 50;
 
 // ============================================================================================== //
@@ -82,6 +83,8 @@ void setup() {
   if (SERIAL_DEBUG_MODE) {
     Serial.begin(9600);
   }
+
+  transceiver.begin(transceiver.REMOTE, RADIO_ADDRESS);
 
   pinMode(L_BLINKER_SWITCH_PIN, INPUT_PULLUP);
   pinMode(R_BLINKER_SWITCH_PIN, INPUT_PULLUP);
