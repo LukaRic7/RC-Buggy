@@ -41,9 +41,7 @@ class Transceiver {
      * @return \c boolean - True if RF module initialized successfully.
      */
     boolean begin(Role role, const byte address[6]) {
-      Serial.println("Trans begin");
       if (!radio.begin()) {
-        Serial.println("Trans failed to begin");
         return false;
       }
 
@@ -81,9 +79,7 @@ class Transceiver {
      * @return \c boolean - True if valid telemetry was received.
      */
     boolean send(const ControlPacket& packet, TelemetryPacket& telemetryOut) {
-      Serial.println("Trans send");
       if (role != REMOTE) {
-        Serial.println("Trans send, not remote");
         return false;
       }
 
@@ -123,14 +119,11 @@ class Transceiver {
      * @return \c boolean - True if a valid packet was received.
      */
     boolean receive(ControlPacket& packet) {
-      Serial.println("Trans receive");
       if (role != BUGGY) {
-        Serial.println("Trans receive, not buggy");
         return false;
       }
 
       if (!radio.available()) {
-        Serial.println("Trans receive, not available");
         return false;
       }
 
@@ -138,14 +131,12 @@ class Transceiver {
 
       // Check the header
       if (packet.header != 0xAB) {
-        Serial.println("Trans receive, wrong header");
         return false;
       }
 
       // Checksum check
       uint16_t expected = packet.throttle ^ packet.steering;
       if (packet.checksum != expected) {
-        Serial.println("Trans receive, wrong checksum");
         return false;
       }
 
@@ -158,9 +149,7 @@ class Transceiver {
      * @param telemetry \c TelemetryPacket - Telemetry snapshot to send back to the remote.
      */
     void sendTelemetry(const TelemetryPacket& telemetry) {
-      Serial.println("Trans telemetry");
       if (role != BUGGY) return;
-      Serial.println("Trans telemetry passed");
 
       radio.writeAckPayload(1, &telemetry, sizeof(telemetry));
     }
