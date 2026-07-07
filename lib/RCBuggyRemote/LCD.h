@@ -25,6 +25,7 @@ class LCD {
     )
       : lcd(rsPin, enPin, d4Pin, d5Pin, d6Pin, d7Pin), timer((uint32_t)updateIntervalMs * 1000)
     {
+      Serial.println("Initializing LCD...");
       lcd.begin(20, 4);
     }
     
@@ -35,6 +36,8 @@ class LCD {
       if (!timer.ready()) return;
 
       formatTelemetry(rpm, kmh, corner, acceleration, pitch, roll, wattage, batteryPct, text);
+
+      lcd.clear();
 
       // Row 1
       lcd.setCursor(0, 0);
