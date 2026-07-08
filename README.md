@@ -6,7 +6,7 @@
 - **Marc:** Systems Engineer
 
 ## Electronics Part List
-### Remote
+### Remote (unfinished)
 - 1x Arduino Nano
 - 1x 20x4 LCD Module
 - 1x Taper Potentiometer
@@ -19,7 +19,7 @@
 - 1x 180 Ω Resistor
 - 1x 47 µF Electrolytic Capacitor
 
-### Buggy
+### Buggy (unfinished)
 - 1x Arduino Nano
 - 1x GY-521 Accelerometer
 - 2x Piezoelectric Vibration Module
