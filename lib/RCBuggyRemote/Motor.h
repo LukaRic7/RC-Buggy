@@ -122,7 +122,7 @@ class Motor {
     
     float externalSpeedUpRatio, wheelRadiusCm;
 
-    static Motor* instance;
+    inline static Motor* instance = nullptr;
 
     /**
      * @brief Interrupt service routine function for the encoder interrupt.

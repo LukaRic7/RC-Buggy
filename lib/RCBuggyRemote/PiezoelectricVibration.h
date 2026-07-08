@@ -14,7 +14,7 @@
  */
 class PiezoelectricVibration {
   public:
-    static constexpr uint16_t BUFFER_SIZE = 1000;
+    static constexpr uint16_t BUFFER_SIZE = 100;
 
     PiezoelectricVibration(uint8_t pin, uint16_t sampleRateMs=2)
       : pin(pin), timer((uint32_t)sampleRateMs * 1000), baseline(512), sum(0), index(0)
@@ -47,7 +47,7 @@ class PiezoelectricVibration {
     /**
      * @brief Get the current rolling average vibration value.
      * 
-     * @return \c uint16_t - Read only, the rolling average vibration value. Default buffer is 1000.
+     * @return \c uint16_t - Read only, the rolling average vibration value. Default buffer is 100.
      */
     uint16_t getAverage() const {
       return sum / BUFFER_SIZE;

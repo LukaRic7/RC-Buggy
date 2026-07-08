@@ -25,7 +25,7 @@
 #include "NTCTermistor.h"
 #include "Transceiver.h"
 #include "Packets.h"
-#include "Motor.h"
+//#include "Motor.h"
 #include "LED.h"
 
 // ============================================================================================== //
@@ -48,8 +48,8 @@ constexpr float WHEEL_RADIUS_CM = 5.0f;
 // ============================================================================================== //
 
 // Transceiver
-constexpr uint8_t TRANS_CE_PIN   = 7; // Moved from 9 to 7
-constexpr uint8_t TRANS_CSN_PIN  = 8; // Moved from 10 to 8
+constexpr uint8_t TRANS_CE_PIN   = 7;
+constexpr uint8_t TRANS_CSN_PIN  = 8;
 constexpr uint8_t TRANS_MOSI_PIN = 11;
 constexpr uint8_t TRANS_MISO_PIN = 12;
 constexpr uint8_t TRANS_SCK_PIN  = 13;
@@ -92,13 +92,17 @@ PiezoelectricVibration backVibration(PIEZO_VIBRATION_BACK_PIN);
 Accelerometer accelerometer(10);
 NTCTermistor ntcTermistor(NTC_TERMISTOR_PIN);
 
+/*
 Motor motor(
   MOTOR_FORWARD_PWM_PIN, MOTOR_BACKWARD_PWM_PIN, MOTOR_ENCODER_CHANNEL_A_PIN,
   MOTOR_ENCODER_CHANNEL_B_PIN, GEARBOX_RATIO, WHEEL_RADIUS_CM
 );
+*/
 
 LED headlights(HEADLIGHTS_PIN);
 LED hazards(HAZARD_LIGHTS_PIN);
+
+TelemetryPacket telemetry;
 
 /**
  * @brief Called by system at the startup once.
@@ -107,25 +111,44 @@ void setup() {
   if (SERIAL_DEBUG_MODE) {
     Serial.begin(9600);
   }
+
+  pinMode(HEADLIGHTS_PIN, OUTPUT);
+  pinMode(HAZARD_LIGHTS_PIN, OUTPUT);
   
   transceiver.begin(transceiver.BUGGY, RADIO_ADDRESS);
   accelerometer.begin();
-  motor.begin();
+  //motor.begin();
 }
 
 /**
  * @brief Called by system every time possible.
  */
 void loop() {
-  ControlPacket control;
-
   accelerometer.update();
   ntcTermistor.update();
   frontVibration.update();
   backVibration.update();
-  motor.update();
+  //motor.update();
+  
+  telemetry.rpm          = 0; //motor.getRPM();
+  telemetry.kmh          = 0; //motor.getKMH() * 100;
+  telemetry.temperature  = ntcTermistor.getCelcius() * 10;
+  telemetry.corner       = accelerometer.getLatAccel() * 100;
+  telemetry.acceleration = accelerometer.getLongAccel() * 100;
+  telemetry.pitch        = accelerometer.getPitch() * 10;
+  telemetry.roll         = accelerometer.getRoll() * 10;
+  telemetry.wattage      = 0 * 10;
+  telemetry.batteryPct   = 0 * 10;
+  telemetry.frontVib     = frontVibration.getAverage();
+  telemetry.backVib      = backVibration.getAverage();
 
+  telemetry.checksum = telemetry.rpm ^ telemetry.wattage;
+
+  ControlPacket control;
   if (transceiver.receive(control)) {
+    boolean result = transceiver.sendTelemetry(telemetry);
+    Serial.println(result);
+
     // Control headlights
     if (control.headlightsOn) {
       headlights.on();
@@ -141,24 +164,7 @@ void loop() {
     }
 
     // Control motor
-    motor.setMotorPwm(control.throttle);
-
-    TelemetryPacket telemetry;
-    telemetry.rpm          = motor.getRPM();
-    telemetry.kmh          = motor.getKMH() * 100;
-    telemetry.temperature  = ntcTermistor.getCelcius() * 10;
-    telemetry.corner       = accelerometer.getLatAccel() * 100;
-    telemetry.acceleration = accelerometer.getLongAccel() * 100;
-    telemetry.pitch        = accelerometer.getPitch() * 10;
-    telemetry.roll         = accelerometer.getRoll() * 10;
-    telemetry.wattage      = 0 * 10;
-    telemetry.batteryPct   = 0 * 10;
-    telemetry.frontVib     = frontVibration.getAverage();
-    telemetry.backVib      = backVibration.getAverage();
-  
-    telemetry.checksum = telemetry.rpm ^ telemetry.wattage;
-  
-    transceiver.sendTelemetry(telemetry);
+    //motor.setMotorPwm(control.throttle);
   }
 
   headlights.update();

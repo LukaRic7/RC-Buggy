@@ -86,6 +86,9 @@ void setup() {
     Serial.begin(9600);
   }
 
+  pinMode(HEADLIGHTS_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(HAZARDS_SWITCH_PIN, INPUT_PULLUP);
+
   transceiver.begin(transceiver.REMOTE, RADIO_ADDRESS);
 }
 
@@ -96,25 +99,25 @@ void loop() {
   if (transmitTimer.ready()) {
     uint16_t throttlePot = 1023 - analogRead(THROTTLE_POT_PIN);
     uint16_t steeringPot = analogRead(STEERING_POT_PIN);
-    boolean hazardsOn    = !analogRead(HAZARDS_SWITCH_PIN);
-    boolean headlightsOn = !analogRead(HEADLIGHTS_SWITCH_PIN);
+    boolean hazardsOn    = digitalRead(HAZARDS_SWITCH_PIN);
+    boolean headlightsOn = digitalRead(HEADLIGHTS_SWITCH_PIN);
 
     ControlPacket control(hazardsOn, headlightsOn, throttlePot, steeringPot);
     TelemetryPacket telemetry;
     if (transceiver.send(control, telemetry)) {
-     lcd.setData(
-      telemetry.rpm,
-      telemetry.kmh / 100.0f,
-      telemetry.temperature / 10.0f,
-      telemetry.corner / 100.0f,
-      telemetry.acceleration / 100.0f,
-      telemetry.pitch / 10.0f,
-      telemetry.roll / 10.0f,
-      telemetry.wattage / 10.0f,
-      telemetry.batteryPct / 10.0f,
-      telemetry.frontVib,
-      telemetry.backVib
-     );
+      lcd.setData(
+        telemetry.rpm,
+        telemetry.kmh / 100.0f,
+        telemetry.temperature / 10.0f,
+        telemetry.corner / 100.0f,
+        telemetry.acceleration / 100.0f,
+        telemetry.pitch / 10.0f,
+        telemetry.roll / 10.0f,
+        telemetry.wattage / 10.0f,
+        telemetry.batteryPct / 10.0f,
+        telemetry.frontVib,
+        telemetry.backVib
+      );
     }
 
     if (!transceiver.isLinkAlive()) {

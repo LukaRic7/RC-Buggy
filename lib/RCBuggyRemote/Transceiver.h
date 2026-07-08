@@ -65,6 +65,8 @@ class Transceiver {
       lastGoodLinkMs = millis();
       linkAlive      = true;
 
+      radio.printDetails();
+
       return true;
     }
 
@@ -147,11 +149,19 @@ class Transceiver {
      * @brief Attach telemetry data to ACK response.
      * 
      * @param telemetry \c TelemetryPacket - Telemetry snapshot to send back to the remote.
+     * 
+     * @return \c boolean - True if ACK payload was successfully attached.
      */
-    void sendTelemetry(const TelemetryPacket& telemetry) {
-      if (role != BUGGY) return;
+    boolean sendTelemetry(const TelemetryPacket& telemetry) {
+      if (role != BUGGY) {
+        return false;
+      }
 
-      radio.writeAckPayload(1, &telemetry, sizeof(telemetry));
+      if (radio.writeAckPayload(1, &telemetry, sizeof(telemetry))) {
+        return true;
+      }
+
+      return false;
     }
 
     /**
