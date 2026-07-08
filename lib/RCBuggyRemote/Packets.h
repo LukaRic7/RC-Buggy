@@ -6,8 +6,8 @@
  * @brief Control packet sent from REMOTE to BUGGY.
  * 
  * @param header \c uint8_t - Used for validation / sanity check.
- * @param rightBlinker \c boolean - Right blinker state.
- * @param leftBlinker \c boolean - Left blinker state.
+ * @param hazardsOn \c boolean - Hazard lights state.
+ * @param headlightsOn \c boolean - Headlights state.
  * @param throttle \c uint16_t - Throttle level 0-1023.
  * @param steering \c uint16_t - Steering angle 0-1023.
  * @param uint16_t \c checksum - Integrity validation (XOR-based).
@@ -15,8 +15,8 @@
 struct __attribute__((packed)) ControlPacket {
   uint8_t header = 0xAB;
   
-  boolean rightBlinker;
-  boolean leftBlinker;
+  boolean hazardsOn;
+  boolean headlightsOn;
   uint16_t throttle;
   uint16_t steering;
 
@@ -32,8 +32,8 @@ struct __attribute__((packed)) ControlPacket {
    * @param throttle \c uint16_t - Throttle level 0-1023.
    * @param steering \c uint16_t - Steering angle 0-1023.
    */
-  ControlPacket(boolean rightBlinker, boolean leftBlinker, uint16_t throttle, uint16_t steering)
-    : rightBlinker(rightBlinker), leftBlinker(leftBlinker), throttle(throttle), steering(steering)
+  ControlPacket(boolean hazardsOn, boolean headlightsOn, uint16_t throttle, uint16_t steering)
+    : hazardsOn(hazardsOn), headlightsOn(headlightsOn), throttle(throttle), steering(steering)
   {
     checksum = throttle ^ steering;
   }

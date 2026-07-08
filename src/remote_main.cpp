@@ -42,7 +42,7 @@ constexpr uint8_t TRANSMIT_HZ = 50;
 
 // Pins left for grabs:
 // DIGITAL: None
-// ANALOGS: A5, A6, A7
+// ANALOGS: A4, A5, A6, A7
 
 // Transceiver
 constexpr uint8_t TRANS_CE_PIN   = 9;
@@ -60,9 +60,8 @@ constexpr uint8_t LCD_D6_PIN = 7;
 constexpr uint8_t LCD_D7_PIN = 8;
 
 // Switches
-constexpr uint8_t L_BLINKER_SWITCH_PIN  = A1;
-constexpr uint8_t R_BLINKER_SWITCH_PIN  = A2;
-constexpr uint8_t HEADLIGHTS_SWITCH_PIN = A4;
+constexpr uint8_t HAZARDS_SWITCH_PIN    = A1;
+constexpr uint8_t HEADLIGHTS_SWITCH_PIN = A2;
 
 // Potentiometers
 constexpr uint8_t THROTTLE_POT_PIN = A3;
@@ -90,9 +89,6 @@ void setup() {
   }
 
   transceiver.begin(transceiver.REMOTE, RADIO_ADDRESS);
-
-  pinMode(L_BLINKER_SWITCH_PIN, INPUT_PULLUP);
-  pinMode(R_BLINKER_SWITCH_PIN, INPUT_PULLUP);
 }
 
 /**
@@ -102,10 +98,10 @@ void loop() {
   if (transmitTimer.ready()) {
     uint16_t throttlePot = 1023 - analogRead(THROTTLE_POT_PIN);
     uint16_t steeringPot = analogRead(STEERING_POT_PIN);
-    boolean leftBlinker  = !analogRead(L_BLINKER_SWITCH_PIN);
-    boolean rightBlinker = !analogRead(R_BLINKER_SWITCH_PIN);
+    boolean hazardsOn    = !analogRead(HAZARDS_SWITCH_PIN);
+    boolean headlightsOn = !analogRead(HEADLIGHTS_SWITCH_PIN);
 
-    ControlPacket control(leftBlinker, rightBlinker, throttlePot, steeringPot);
+    ControlPacket control(hazardsOn, headlightsOn, throttlePot, steeringPot);
     TelemetryPacket telemetry;
     if (transceiver.send(control, telemetry)) {
      lcd.setData(

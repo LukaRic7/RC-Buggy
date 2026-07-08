@@ -26,6 +26,7 @@
 #include "Transceiver.h"
 #include "Packets.h"
 #include "Motor.h"
+#include "LED.h"
 
 // ============================================================================================== //
 // CONFIGURATION                                                                                  //
@@ -47,12 +48,12 @@ constexpr float WHEEL_RADIUS_CM = 5.0f;
 // ============================================================================================== //
 
 // Pins left for grabs:
-// DIGITAL: D4, D7, D8
+// DIGITAL: None
 // ANALOGS: A3, A6, A7
 
 // Transceiver
-constexpr uint8_t TRANS_CE_PIN   = 9;
-constexpr uint8_t TRANS_CSN_PIN  = 10;
+constexpr uint8_t TRANS_CE_PIN   = 7; // Moved from 9 to 7
+constexpr uint8_t TRANS_CSN_PIN  = 8; // Moved from 10 to 8
 constexpr uint8_t TRANS_MOSI_PIN = 11;
 constexpr uint8_t TRANS_MISO_PIN = 12;
 constexpr uint8_t TRANS_SCK_PIN  = 13;
@@ -74,6 +75,13 @@ constexpr uint8_t MOTOR_BACKWARD_PWM_PIN      = 6;
 constexpr uint8_t MOTOR_ENCODER_CHANNEL_A_PIN = 2;
 constexpr uint8_t MOTOR_ENCODER_CHANNEL_B_PIN = 3;
 
+// Servo
+constexpr uint8_t SERVO_PIN = 9;
+
+// Lights
+constexpr uint8_t HEADLIGHTS_PIN    = 4;
+constexpr uint8_t HAZARD_LIGHTS_PIN = 10;
+
 // ============================================================================================== //
 // LIFECYCLE                                                                                      //
 // ============================================================================================== //
@@ -92,6 +100,9 @@ Motor motor(
   MOTOR_FORWARD_PWM_PIN, MOTOR_BACKWARD_PWM_PIN, MOTOR_ENCODER_CHANNEL_A_PIN,
   MOTOR_ENCODER_CHANNEL_B_PIN, GEARBOX_RATIO, WHEEL_RADIUS_CM
 );
+
+LED headlights(HEADLIGHTS_PIN);
+LED hazards(HAZARD_LIGHTS_PIN);
 
 /**
  * @brief Called by system at the startup once.
@@ -119,6 +130,23 @@ void loop() {
   motor.update();
 
   if (transceiver.receive(control)) {
+    // Control headlights
+    if (control.headlightsOn) {
+      headlights.on();
+    } else {
+      headlights.off();
+    }
+
+    // Control hazards
+    if (control.hazardsOn) {
+      hazards.blink();
+    } else {
+      hazards.off();
+    }
+
+    // Control motor
+    motor.setMotorPwm(control.throttle);
+
     TelemetryPacket telemetry;
     telemetry.rpm          = motor.getRPM();
     telemetry.kmh          = motor.getKMH() * 100;
@@ -136,4 +164,7 @@ void loop() {
   
     transceiver.sendTelemetry(telemetry);
   }
+
+  headlights.update();
+  hazards.update();
 }
