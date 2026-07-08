@@ -40,6 +40,10 @@ constexpr uint8_t TRANSMIT_HZ = 50;
 // PIN DEFINITIONS                                                                                //
 // ============================================================================================== //
 
+// Pins left for grabs:
+// DIGITAL: None
+// ANALOGS: A5, A6, A7
+
 // Transceiver
 constexpr uint8_t TRANS_CE_PIN   = 9;
 constexpr uint8_t TRANS_CSN_PIN  = 10;
@@ -56,22 +60,23 @@ constexpr uint8_t LCD_D6_PIN = 7;
 constexpr uint8_t LCD_D7_PIN = 8;
 
 // Switches
-constexpr uint8_t L_BLINKER_SWITCH_PIN = A1;
-constexpr uint8_t R_BLINKER_SWITCH_PIN = A2;
+constexpr uint8_t L_BLINKER_SWITCH_PIN  = A1;
+constexpr uint8_t R_BLINKER_SWITCH_PIN  = A2;
+constexpr uint8_t HEADLIGHTS_SWITCH_PIN = A4;
 
 // Potentiometers
 constexpr uint8_t THROTTLE_POT_PIN = A3;
 constexpr uint8_t STEERING_POT_PIN = A0;
 
 // Light Emitting Diodes
-constexpr uint8_t ERROR_LED_PIN = 3;
+constexpr uint8_t NO_SIGNAL_LED_PIN = 3;
 
 // ============================================================================================== //
 // LIFECYCLE                                                                                      //
 // ============================================================================================== //
 
 LCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN, 500);
-LED noSignalLed(ERROR_LED_PIN);
+LED noSignalLed(NO_SIGNAL_LED_PIN);
 Transceiver transceiver(TRANS_CE_PIN, TRANS_CSN_PIN);
 
 TimeScheduler transmitTimer(1000000 / (uint32_t)TRANSMIT_HZ);
@@ -97,7 +102,7 @@ void loop() {
   if (transmitTimer.ready()) {
     uint16_t throttlePot = 1023 - analogRead(THROTTLE_POT_PIN);
     uint16_t steeringPot = analogRead(STEERING_POT_PIN);
-    boolean leftBlinker = !analogRead(L_BLINKER_SWITCH_PIN);
+    boolean leftBlinker  = !analogRead(L_BLINKER_SWITCH_PIN);
     boolean rightBlinker = !analogRead(R_BLINKER_SWITCH_PIN);
 
     ControlPacket control(leftBlinker, rightBlinker, throttlePot, steeringPot);

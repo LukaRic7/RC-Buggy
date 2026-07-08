@@ -41,6 +41,10 @@ constexpr uint8_t TRANSMIT_HZ = 50;
 // PIN DEFINITIONS                                                                                //
 // ============================================================================================== //
 
+// Pins left for grabs:
+// DIGITAL: D4, D7, D8
+// ANALOGS: A3, A6, A7
+
 // Transceiver
 constexpr uint8_t TRANS_CE_PIN   = 9;
 constexpr uint8_t TRANS_CSN_PIN  = 10;
@@ -58,6 +62,12 @@ constexpr uint8_t NTC_TERMISTOR_PIN = A0;
 // Piezoelectric vibration
 constexpr uint8_t PIEZO_VIBRATION_FRONT_PIN = A1;
 constexpr uint8_t PIEZO_VIBRATION_BACK_PIN  = A2;
+
+// Motor
+constexpr uint8_t MOTOR_FORWARD_PWM_PIN       = 5;
+constexpr uint8_t MOTOR_BACKWARD_PWM_PIN      = 6;
+constexpr uint8_t MOTOR_ENCODER_CHANNEL_A_PIN = 2;
+constexpr uint8_t MOTOR_ENCODER_CHANNEL_B_PIN = 3;
 
 // ============================================================================================== //
 // LIFECYCLE                                                                                      //
@@ -95,17 +105,17 @@ void loop() {
 
   if (transceiver.receive(control)) {
     TelemetryPacket telemetry;
-    telemetry.rpm = 0;
-    telemetry.kmh = 0 * 100;
-    telemetry.temperature = ntcTermistor.getCelcius() * 10;
-    telemetry.corner = accelerometer.getLatAccel() * 100;
+    telemetry.rpm          = 0;
+    telemetry.kmh          = 0 * 100;
+    telemetry.temperature  = ntcTermistor.getCelcius() * 10;
+    telemetry.corner       = accelerometer.getLatAccel() * 100;
     telemetry.acceleration = accelerometer.getLongAccel() * 100;
-    telemetry.pitch = accelerometer.getPitch() * 10;
-    telemetry.roll = accelerometer.getRoll() * 10;
-    telemetry.wattage = 0 * 10;
-    telemetry.batteryPct = 0 * 10;
-    telemetry.frontVib = frontVibration.getCurrent();
-    telemetry.backVib = backVibration.getCurrent();
+    telemetry.pitch        = accelerometer.getPitch() * 10;
+    telemetry.roll         = accelerometer.getRoll() * 10;
+    telemetry.wattage      = 0 * 10;
+    telemetry.batteryPct   = 0 * 10;
+    telemetry.frontVib     = frontVibration.getAverage();
+    telemetry.backVib      = backVibration.getAverage();
   
     telemetry.checksum = telemetry.rpm ^ telemetry.wattage;
   
