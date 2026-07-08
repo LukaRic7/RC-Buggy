@@ -47,10 +47,6 @@ constexpr float WHEEL_RADIUS_CM = 5.0f;
 // PIN DEFINITIONS                                                                                //
 // ============================================================================================== //
 
-// Pins left for grabs:
-// DIGITAL: None
-// ANALOGS: A3, A6, A7
-
 // Transceiver
 constexpr uint8_t TRANS_CE_PIN   = 7; // Moved from 9 to 7
 constexpr uint8_t TRANS_CSN_PIN  = 8; // Moved from 10 to 8

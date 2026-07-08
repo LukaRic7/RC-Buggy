@@ -9,3 +9,7 @@
 
 # Problems For Later
 - None
+
+# Pins left
+- Buggy:  A3, A6, A7
+- Remote: A4, A5, A6, A7

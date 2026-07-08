@@ -40,10 +40,6 @@ constexpr uint8_t TRANSMIT_HZ = 50;
 // PIN DEFINITIONS                                                                                //
 // ============================================================================================== //
 
-// Pins left for grabs:
-// DIGITAL: None
-// ANALOGS: A4, A5, A6, A7
-
 // Transceiver
 constexpr uint8_t TRANS_CE_PIN   = 9;
 constexpr uint8_t TRANS_CSN_PIN  = 10;
