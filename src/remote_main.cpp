@@ -70,11 +70,13 @@ constexpr uint8_t NO_SIGNAL_LED_PIN = 3;
 // LIFECYCLE                                                                                      //
 // ============================================================================================== //
 
-LCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN, 500);
-LED noSignalLed(NO_SIGNAL_LED_PIN);
+TimeScheduler transmitTimer(1000000 / (uint32_t)TRANSMIT_HZ);
+
 Transceiver transceiver(TRANS_CE_PIN, TRANS_CSN_PIN);
 
-TimeScheduler transmitTimer(1000000 / (uint32_t)TRANSMIT_HZ);
+LCD lcd(LCD_RS_PIN, LCD_EN_PIN, LCD_D4_PIN, LCD_D5_PIN, LCD_D6_PIN, LCD_D7_PIN, 500);
+
+LED noSignalLed(NO_SIGNAL_LED_PIN);
 
 /**
  * @brief Called by system at the startup once.
