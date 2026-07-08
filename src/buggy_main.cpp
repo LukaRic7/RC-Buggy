@@ -25,6 +25,7 @@
 #include "NTCTermistor.h"
 #include "Transceiver.h"
 #include "Packets.h"
+#include "Motor.h"
 
 // ============================================================================================== //
 // CONFIGURATION                                                                                  //
@@ -36,6 +37,10 @@ constexpr boolean SERIAL_DEBUG_MODE = true;
 // Radio communication
 const byte RADIO_ADDRESS[6]   = "RCBUG"; 
 constexpr uint8_t TRANSMIT_HZ = 50;
+
+// Mechanical
+constexpr float GEARBOX_RATIO   = 1.0f;
+constexpr float WHEEL_RADIUS_CM = 5.0f;
 
 // ============================================================================================== //
 // PIN DEFINITIONS                                                                                //
@@ -73,12 +78,20 @@ constexpr uint8_t MOTOR_ENCODER_CHANNEL_B_PIN = 3;
 // LIFECYCLE                                                                                      //
 // ============================================================================================== //
 
+TimeScheduler transmitTimer(1000000 / (uint32_t)TRANSMIT_HZ);
+
 Transceiver transceiver(TRANS_CE_PIN, TRANS_CSN_PIN);
+
 PiezoelectricVibration frontVibration(PIEZO_VIBRATION_FRONT_PIN);
 PiezoelectricVibration backVibration(PIEZO_VIBRATION_BACK_PIN);
+
 Accelerometer accelerometer(10);
-TimeScheduler transmitTimer(1000000 / (uint32_t)TRANSMIT_HZ);
 NTCTermistor ntcTermistor(NTC_TERMISTOR_PIN);
+
+Motor motor(
+  MOTOR_FORWARD_PWM_PIN, MOTOR_BACKWARD_PWM_PIN, MOTOR_ENCODER_CHANNEL_A_PIN,
+  MOTOR_ENCODER_CHANNEL_B_PIN, GEARBOX_RATIO, WHEEL_RADIUS_CM
+);
 
 /**
  * @brief Called by system at the startup once.
@@ -90,6 +103,7 @@ void setup() {
   
   transceiver.begin(transceiver.BUGGY, RADIO_ADDRESS);
   accelerometer.begin();
+  motor.begin();
 }
 
 /**
@@ -102,11 +116,12 @@ void loop() {
   ntcTermistor.update();
   frontVibration.update();
   backVibration.update();
+  motor.update();
 
   if (transceiver.receive(control)) {
     TelemetryPacket telemetry;
-    telemetry.rpm          = 0;
-    telemetry.kmh          = 0 * 100;
+    telemetry.rpm          = motor.getRPM();
+    telemetry.kmh          = motor.getKMH() * 100;
     telemetry.temperature  = ntcTermistor.getCelcius() * 10;
     telemetry.corner       = accelerometer.getLatAccel() * 100;
     telemetry.acceleration = accelerometer.getLongAccel() * 100;
