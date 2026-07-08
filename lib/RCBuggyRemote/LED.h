@@ -26,10 +26,10 @@ class LED {
 
       // Compute the position inside the blink cycle and normalize
       uint16_t elapsed = (millis() - blinkStartMs) % blinkRateMs;
-      float phase = (float)elapsed / (float)blinkRateMs;
+      float phase      = (float)elapsed / (float)blinkRateMs;
 
       // Calculate the triangle wave brightness (linear fade in/out), then square it
-      float intensity = phase < 0.5f ? phase * 2.0f : (1.0f - phase) * 2.0f;
+      float intensity            = phase < 0.5f ? phase * 2.0f : (1.0f - phase) * 2.0f;
       float exponentialIntensity = intensity * intensity;
       
       // Scale to a byte and write out
@@ -41,7 +41,7 @@ class LED {
      */
     void on() {
       blinking = false;
-      state = true;
+      state    = true;
 
       analogWrite(pin, 255);
     }
@@ -51,7 +51,7 @@ class LED {
      */
     void off() {
       blinking = false;
-      state = false;
+      state    = false;
 
       analogWrite(pin, 0);
     }
@@ -64,8 +64,8 @@ class LED {
     void blink(uint16_t rateMs=1000) {
       if (blinking && blinkRateMs == rateMs) return; // Already in blinking mode at the same rate
 
-      blinking = true;
-      blinkRateMs = rateMs;
+      blinking     = true;
+      blinkRateMs  = rateMs;
       blinkStartMs = millis();
       
       timer.reset();

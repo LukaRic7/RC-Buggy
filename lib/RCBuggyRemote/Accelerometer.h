@@ -14,9 +14,8 @@
 class Accelerometer {
   public:
     Accelerometer(uint16_t sampleRateMs=10, uint8_t address=0x68)
-      : timer((uint32_t)sampleRateMs * 1000), address(address),
-        roll(0), pitch(0), yaw(0), long_acc(0), lat_acc(0),
-        dt(sampleRateMs * 1000.0f * 1e-6f)
+      : timer((uint32_t)sampleRateMs * 1000), address(address), roll(0), pitch(0), yaw(0),
+        long_acc(0), lat_acc(0), dt(sampleRateMs * 1000.0f * 1e-6f)
     {}
 
   /**
@@ -71,48 +70,48 @@ class Accelerometer {
     float azf = az / 16384.0f;
 
     long_acc = axf;
-    lat_acc = ayf;
+    lat_acc  = ayf;
 
-    float roll_acc = atan2(ayf, azf) * RAD_TO_DEG;
+    float roll_acc  = atan2(ayf, azf) * RAD_TO_DEG;
     float pitch_acc = atan2(-axf, sqrt(ayf*ayf + azf*azf)) * RAD_TO_DEG;
 
     // Correct Complementary Filter math
-    roll = 0.98f * (roll + gxf * dt) + 0.02f * roll_acc;
+    roll  = 0.98f * (roll  + gxf * dt) + 0.02f * roll_acc;
     pitch = 0.98f * (pitch + gyf * dt) + 0.02f * pitch_acc;
-    yaw += gzf * dt; // Drifts with no magnotometer
+    yaw   += gzf * dt; // Drifts with no magnotometer
   }
 
   /**
-   * @brief 
+   * @brief Get the current pitch in degress.
    * 
-   * @return \c float - 
+   * @return \c float - Read only, pitch in degrees.
    */
   float getPitch() const {
     return pitch;
   }
 
   /**
-   * @brief 
+   * @brief Get the current roll in degrees.
    * 
-   * @return \c float - 
+   * @return \c float - Read only, roll in degrees.
    */
   float getRoll() const {
     return roll;
   }
 
   /**
-   * @brief 
+   * @brief Get the current lateral acceleration.
    * 
-   * @return \c float - 
+   * @return \c float - Read only, lateral acceleration in gravitational units.
    */
   float getLatAccel() const {
     return lat_acc;
   }
 
   /**
-   * @brief 
+   * @brief Get the current longetutional acceleration.
    * 
-   * @return \c float - 
+   * @return \c float - Read only, longetutional acceleration in gravitational units.
    */
   float getLongAccel() const {
     return long_acc;
@@ -131,7 +130,7 @@ class Accelerometer {
     /**
      * @brief Internal function for reading 16 bits from wire.
      * 
-     * @return int16_t. 2 Byte result from the read.
+     * @return \c int16_t - 2 Byte result from the read.
      */
     inline int16_t read16() {
       return (Wire.read() << 8) | Wire.read();

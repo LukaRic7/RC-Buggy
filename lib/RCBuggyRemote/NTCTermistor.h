@@ -24,18 +24,20 @@ class NTCTermistor {
       if (!timer.ready()) return;
 
       uint16_t rawValue = analogRead(pin);
-      float voltage = rawValue * 5.0f / 1023.0f;
-      float resistance = (voltage / 5.0f) * 10000.0f
-        / (1.0f - (voltage / 5.0f));
+      float voltage     = rawValue * 5.0f / 1023.0f;
+
+      // Circuit includes a 10k ohm resistor
+      float resistance = (voltage / 5.0f) * 10000.0f / (1.0f - (voltage / 5.0f));
       
+      // Beta equation + celcius convertion
       celcius = (1.0f / ((1.0f / 298.15f) + (1.0f / 3950.0f)
-        * log(resistance / 10000.0f))) - 273.15f;
+        * log(resistance / 10000.0f))) - 273.15f; // Natural log
     }
     
     /**
      * @brief Returns the last measured temperature in degrees Celsius.
      * 
-     * @return \c float - Last measured temperature in degrees Celsius.
+     * @return \c float - Read only, last measured temperature in degrees Celsius.
      */
     float getCelcius() const {
       return celcius;

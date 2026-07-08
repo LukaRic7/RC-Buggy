@@ -32,9 +32,8 @@ struct __attribute__((packed)) ControlPacket {
    * @param throttle \c uint16_t - Throttle level 0-1023.
    * @param steering \c uint16_t - Steering angle 0-1023.
    */
-  ControlPacket(bool rightBlinker, bool leftBlinker, uint16_t throttle, uint16_t steering)
-    : rightBlinker(rightBlinker), leftBlinker(leftBlinker),
-      throttle(throttle), steering(steering)
+  ControlPacket(boolean rightBlinker, boolean leftBlinker, uint16_t throttle, uint16_t steering)
+    : rightBlinker(rightBlinker), leftBlinker(leftBlinker), throttle(throttle), steering(steering)
   {
     checksum = throttle ^ steering;
   }
@@ -48,13 +47,16 @@ struct __attribute__((packed)) ControlPacket {
  * 
  * @param header \c uint8_t - Used for validation / sanity check.
  * @param rpm \c uint16_t - Rotations/Minute of the motor.
- * @param kmh \c float - Kilometers/Hour of the buggy.
- * @param corner \c float - Lateral g-force experienced.
- * @param acceleration \c float - Longitutional g-force experienced.
- * @param pitch \c float - Pitch of the buggy.
- * @param roll \c float - Roll of the buggy.
- * @param wattage \c uint16_t - Current wattage used by the motor.
- * @param batteryPct \c float - Current onboard battery percentage.
+ * @param kmh \c uint16_t - Kilometers/Hour of the buggy. Multiply by 100.
+ * @param temperature \c int16_t - The gearbox temperature. Multiply by 10.
+ * @param corner \c int16_t - Lateral g-force experienced. Multiply by 100.
+ * @param acceleration \c int16_t - Longitutional g-force experienced. Multiply by 100.
+ * @param pitch \c int16_t - Pitch of the buggy. Multiply by 10.
+ * @param roll \c int16_t - Roll of the buggy. Multiply by 10.
+ * @param wattage \c uint16_t - Current wattage used by the motor. Multiply by 10.
+ * @param batteryPct \c uint16_t - Current onboard battery percentage. Multiply by 10.
+ * @param frontVib \c uint16_t - Front vibration units.
+ * @param backVib \c uint16_t - Back vibration units.
  * @param uint16_t \c checksum - Integrity validation (XOR-based).
  */
 struct __attribute((packed)) TelemetryPacket {
@@ -69,8 +71,8 @@ struct __attribute((packed)) TelemetryPacket {
   int16_t roll;          // degrees * 10
   uint16_t wattage;      // Watts * 10
   uint16_t batteryPct;   // percentage * 10
-  uint8_t frontVib;
-  uint8_t backVib;
+  uint16_t frontVib;
+  uint16_t backVib;
 
   uint16_t checksum;
 };

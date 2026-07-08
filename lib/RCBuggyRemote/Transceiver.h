@@ -63,7 +63,7 @@ class Transceiver {
       }
 
       lastGoodLinkMs = millis();
-      linkAlive = true;
+      linkAlive      = true;
 
       return true;
     }
@@ -96,14 +96,14 @@ class Transceiver {
         // Validate the packet identity
         if (telemetryOut.header == 0xBA) {
           uint16_t expected = telemetryOut.rpm ^ telemetryOut.wattage;
-          gotTelemetry = telemetryOut.checksum == expected;
+          gotTelemetry      = telemetryOut.checksum == expected;
         }
       }
 
       // Update link state ONLY on successful full transaction
       if (gotTelemetry) {
         lastGoodLinkMs = millis();
-        linkAlive = true;
+        linkAlive      = true;
       }
 
       return gotTelemetry;
