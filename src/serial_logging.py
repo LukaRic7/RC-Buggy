@@ -9,7 +9,7 @@ import pyqtgraph as pg
 DIR_PATH = os.path.dirname(__file__)
 LOG_DIR  = os.path.join(DIR_PATH, '../logs')
 
-PACKET_SIZE_BYTES = 25
+PACKET_SIZE_BYTES = 31
 BAUD_RATE         = 115_200
 SERIAL_PORT       = 'COM3'
 UPDATE_FREQ_HZ    = 50
@@ -17,8 +17,8 @@ HISTORY_SECONDS   = 60
 HISTORY_SIZE      = UPDATE_FREQ_HZ * HISTORY_SECONDS
 
 KEYS = [
-    'rpm', 'kmh', 'temperature', 'corner', 'acceleration', 'pitch',
-    'roll', 'wattage', 'batteryPct', 'frontVib', 'backVib'
+    'rpm', 'kmh', 'temperature', 'corner', 'acceleration', 'pitch', 'roll', 'wattage',
+    'batteryPct', 'frontVib', 'backVib', 'throttle', 'steering', 'hazards', 'headlights'
 ]
 
 # Shared memory between background thread and GUI
@@ -41,7 +41,7 @@ def parse_packet(tuple_data:tuple) -> dict:
     """
 
     keys   = ['header'] + KEYS + ['checksum']
-    scales = [1, 1, 100, 10, 100, 100, 10, 10, 10, 10, 1, 1, 1]
+    scales = [1, 1, 100, 10, 100, 100, 10, 10, 10, 10, 1, 1, 1, 1, 1, 1, 1]
 
     data = {}
     for value, key, scale in zip(tuple_data, keys, scales):
@@ -70,7 +70,7 @@ def data_acquisition_thread():
 
         while app_running:
             byte_data  = ser.read(PACKET_SIZE_BYTES)
-            tuple_data = struct.unpack('<BHHhhhhhHHHH', byte_data)
+            tuple_data = struct.unpack('<BHHhhhhhHHHHHHBB', byte_data)
             packet     = parse_packet(tuple_data)
 
             # Write scaled values to CSV based on the KEYS list
