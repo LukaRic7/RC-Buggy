@@ -120,7 +120,17 @@ void loop() {
         telemetry.backVib
       );
 
-      Serial.write((uint8_t*)&telemetry, sizeof(telemetry));
+      if (SERIAL_LOG_TELEMETRY) {
+        SerialPacket serialPacket;
+
+        serialPacket.telemetry  = telemetry;
+        serialPacket.throttle   = throttlePot;
+        serialPacket.steering   = steeringPot;
+        serialPacket.hazards    = hazardsOn;
+        serialPacket.headlights = headlightsOn;
+
+        Serial.write((uint8_t*)&serialPacket, sizeof(serialPacket));
+      }
     }
 
     if (!transceiver.isLinkAlive()) {
