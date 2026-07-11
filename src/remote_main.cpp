@@ -29,8 +29,9 @@
 // CONFIGURATION                                                                                  //
 // ============================================================================================== //
 
-// Debugging
-constexpr boolean SERIAL_DEBUG_MODE = true;
+// Debugging / Logging
+constexpr boolean SERIAL_DEBUG_MODE    = true;
+constexpr boolean SERIAL_LOG_TELEMETRY = true;
 
 // Radio communication
 const byte RADIO_ADDRESS[6]   = "RCBUG"; 
@@ -82,8 +83,8 @@ LED noSignalLed(NO_SIGNAL_LED_PIN);
  * @brief Called by system at the startup once.
  */
 void setup() {
-  if (SERIAL_DEBUG_MODE) {
-    Serial.begin(9600);
+  if (SERIAL_DEBUG_MODE || SERIAL_LOG_TELEMETRY) {
+    Serial.begin(115200);
   }
 
   pinMode(HEADLIGHTS_SWITCH_PIN, INPUT_PULLUP);
@@ -118,6 +119,8 @@ void loop() {
         telemetry.frontVib,
         telemetry.backVib
       );
+
+      Serial.write((uint8_t*)&telemetry, sizeof(telemetry));
     }
 
     if (!transceiver.isLinkAlive()) {

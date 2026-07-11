@@ -109,7 +109,7 @@ TelemetryPacket telemetry;
  */
 void setup() {
   if (SERIAL_DEBUG_MODE) {
-    Serial.begin(9600);
+    Serial.begin(115200);
   }
 
   pinMode(HEADLIGHTS_PIN, OUTPUT);
