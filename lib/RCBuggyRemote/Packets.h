@@ -86,7 +86,7 @@ struct __attribute((packed)) TelemetryPacket {
  * @param hazards \c uint8_t - Boolean value, true if the hazards are on.
  * @param headlights \c uint8_t - Boolean value, true if the headlights are on.
  */
-struct SerialPacket {
+struct __attribute__((packed)) SerialPacket {
   TelemetryPacket telemetry;
 
   uint16_t throttle;
