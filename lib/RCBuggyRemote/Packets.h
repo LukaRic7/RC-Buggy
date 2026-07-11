@@ -76,3 +76,21 @@ struct __attribute((packed)) TelemetryPacket {
 
   uint16_t checksum;
 };
+
+/**
+ * @brief Used for serial data logging, combines telemetry and controls into one struct.
+ * 
+ * @param telemetry \c TelemetryPacket - The telemetry packet.
+ * @param throttle \c uint16_t - The throttle value 0-1023.
+ * @param steering \c uint16_t - The steering value 0-1023.
+ * @param hazards \c uint8_t - Boolean value, true if the hazards are on.
+ * @param headlights \c uint8_t - Boolean value, true if the headlights are on.
+ */
+struct SerialPacket {
+  TelemetryPacket telemetry;
+
+  uint16_t throttle;
+  uint16_t steering;
+  uint8_t hazards;
+  uint8_t headlights;
+};
