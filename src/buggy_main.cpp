@@ -22,6 +22,7 @@
 #include "PiezoelectricVibration.h"
 #include "TimeScheduler.h"
 #include "Accelerometer.h"
+#include "ServoSteering.h"
 #include "NTCTermistor.h"
 #include "Transceiver.h"
 #include "Packets.h"
@@ -42,6 +43,9 @@ constexpr uint8_t TRANSMIT_HZ = 50;
 // Mechanical
 constexpr float GEARBOX_RATIO   = 1.0f;
 constexpr float WHEEL_RADIUS_CM = 5.0f;
+
+// Steering
+constexpr uint8_t MAX_STEERING_ANGLE_DEG = 45;
 
 // ============================================================================================== //
 // PIN DEFINITIONS                                                                                //
@@ -92,6 +96,7 @@ PiezoelectricVibration backVibration(PIEZO_VIBRATION_BACK_PIN);
 Accelerometer accelerometer(10);
 NTCTermistor ntcTermistor(NTC_TERMISTOR_PIN);
 
+ServoSteering servo(SERVO_PIN, MAX_STEERING_ANGLE_DEG);
 /*
 Motor motor(
   MOTOR_FORWARD_PWM_PIN, MOTOR_BACKWARD_PWM_PIN, MOTOR_ENCODER_CHANNEL_A_PIN,
@@ -118,6 +123,7 @@ void setup() {
   transceiver.begin(transceiver.BUGGY, RADIO_ADDRESS);
   accelerometer.begin();
   //motor.begin();
+  servo.begin();
 }
 
 /**
@@ -147,7 +153,6 @@ void loop() {
   ControlPacket control;
   if (transceiver.receive(control)) {
     boolean result = transceiver.sendTelemetry(telemetry);
-    Serial.println(result);
 
     // Control headlights
     if (control.headlightsOn) {
@@ -165,6 +170,10 @@ void loop() {
 
     // Control motor
     //motor.setMotorPwm(control.throttle);
+
+    // Control servo
+    servo.setServoAngle(control.steering);
+    servo.update();
   }
 
   headlights.update();
